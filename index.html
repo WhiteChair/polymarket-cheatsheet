@@ -3,10 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#fafaf7">
+<meta name="theme-color" content="#F97316">
 <meta name="description" content="Polymarket cheat sheet & calculator for amateur bettors. Payout tables, scalping gains, fee reality, and a should-I-take-this-bet calculator.">
 <title>Polymarket Cheat Sheet</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta property="og:title" content="Polymarket Cheat Sheet">
+<meta property="og:description" content="A mobile cheat sheet & calculator for amateur Polymarket bettors. Payout tables, scalping gains, fee reality, and a should-I-take-this-bet calculator.">
+<meta property="og:image" content="/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <style>
   :root {
     --bg: #fafaf7;
@@ -254,6 +261,14 @@
   }
   .crypto-addr .copied { color: var(--good); font-size: 11px; margin-top: 6px; opacity: 0; transition: opacity 0.2s; }
   .crypto-addr .copied.show { opacity: 1; }
+  .chain-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .chain-tab {
+    background: var(--surface); color: var(--text-muted);
+    border: 0.5px solid var(--border); border-radius: 6px;
+    padding: 6px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .chain-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 </style>
 </head>
 <body>
@@ -506,13 +521,18 @@
       <h3>Support the project</h3>
       <p style="margin: 0 0 10px; font-size: 14px; color: var(--text-muted);">This is free and ad-free. If it saved you from a bad bet, tip a coffee's worth.</p>
       <div class="tip-buttons">
-        <a class="tip-btn bmc" href="https://buymeacoffee.com/YOUR_USERNAME" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+        <a class="tip-btn bmc" href="https://buymeacoffee.com/samcolt" target="_blank" rel="noopener">☕ Buy me a coffee</a>
         <button class="tip-btn" id="crypto-toggle" type="button">⟠ Pay in crypto</button>
       </div>
       <div class="crypto-addr" id="crypto-panel">
-        <div class="chain">USDC / ETH / any EVM chain</div>
+        <div class="chain-tabs" role="tablist">
+          <button class="chain-tab active" data-chain="eth" type="button">Ethereum</button>
+          <button class="chain-tab" data-chain="polygon" type="button">Polygon</button>
+          <button class="chain-tab" data-chain="btc" type="button">Bitcoin</button>
+        </div>
+        <div class="chain" id="chain-label">Ethereum — ETH / USDC / any ERC-20</div>
         <div class="addr-row">
-          <code id="crypto-address">0xYOUR_WALLET_ADDRESS_HERE</code>
+          <code id="crypto-address">0xa1bF6ad4a2CB9D569f6C2C4fAb73508302EAE464</code>
           <button id="copy-btn" type="button">Copy</button>
         </div>
         <div class="copied" id="copied-msg">Copied ✓</div>
@@ -614,9 +634,27 @@
   var copyBtn = document.getElementById('copy-btn');
   var copiedMsg = document.getElementById('copied-msg');
   var cryptoAddr = document.getElementById('crypto-address');
+  var chainLabel = document.getElementById('chain-label');
+  var chainTabs = document.querySelectorAll('.chain-tab');
+
+  var chains = {
+    eth: { label: 'Ethereum — ETH / USDC / any ERC-20', addr: '0xa1bF6ad4a2CB9D569f6C2C4fAb73508302EAE464' },
+    polygon: { label: 'Polygon — MATIC / USDC', addr: '0xa1bF6ad4a2CB9D569f6C2C4fAb73508302EAE464' },
+    btc: { label: 'Bitcoin — BTC (bech32)', addr: 'bc1q0887v5dcma4ltqsl4wu6l5vv6md5njsquyv5se' }
+  };
 
   cryptoToggle.addEventListener('click', function(){
     cryptoPanel.classList.toggle('open');
+  });
+
+  chainTabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      chainTabs.forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+      var key = tab.getAttribute('data-chain');
+      chainLabel.textContent = chains[key].label;
+      cryptoAddr.textContent = chains[key].addr;
+    });
   });
 
   copyBtn.addEventListener('click', function(){
