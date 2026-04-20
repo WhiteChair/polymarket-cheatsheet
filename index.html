@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<meta name="description" content="Polymarket cheat sheet & calculator for amateur bettors. Payout tables, scalping gains, fee reality, and a should-I-take-this-bet calculator.">
+<title>Polymarket Cheat Sheet</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --surface-2: #f1efe8;
+    --border: rgba(0,0,0,0.12);
+    --border-2: rgba(0,0,0,0.2);
+    --text: #1a1a1a;
+    --text-muted: #6a6a66;
+    --text-info: #185FA5;
+    --good-bg: #E1F5EE; --good-fg: #04342C; --good: #0F6E56;
+    --warn-bg: #FAEEDA; --warn-fg: #412402; --warn: #BA7517;
+    --bad-bg: #FCEBEB; --bad-fg: #501313; --bad: #A32D2D;
+    --pro-bg: #26215C; --pro-fg: #EEEDFE;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171715;
+      --surface: #1f1f1d;
+      --surface-2: #2a2a27;
+      --border: rgba(255,255,255,0.12);
+      --border-2: rgba(255,255,255,0.2);
+      --text: #eaeae5;
+      --text-muted: #9a9a93;
+      --text-info: #85B7EB;
+      --good-bg: #04342C; --good-fg: #9FE1CB; --good: #5DCAA5;
+      --warn-bg: #412402; --warn-fg: #FAC775; --warn: #EF9F27;
+      --bad-bg: #501313; --bad-fg: #F7C1C1; --bad: #F09595;
+      --pro-bg: #CECBF6; --pro-fg: #26215C;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px 14px 48px; }
+  header { padding: 8px 2px 14px; }
+  header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 720px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .card.full { grid-column: 1 / -1; }
+  .card h3 {
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .row { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .row:last-child { border-bottom: none; }
+  .muted { color: var(--text-muted); }
+  .big { font-weight: 500; }
+  .good { color: var(--good); }
+  .warn { color: var(--warn); }
+  .bad { color: var(--bad); }
+
+  .note, .note-green, .note-red, .note-amber {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.55;
+  }
+  .note { background: var(--surface-2); color: var(--text); }
+  .note-green { background: var(--good-bg); color: var(--good-fg); }
+  .note-red { background: var(--bad-bg); color: var(--bad-fg); }
+  .note-amber { background: var(--warn-bg); color: var(--warn-fg); }
+  .note b, .note-green b, .note-red b, .note-amber b { font-weight: 600; }
+
+  .checklist, .trap { list-style: none; padding: 0; margin: 0; }
+  .checklist li, .trap li { padding: 11px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; line-height: 1.5; }
+  .checklist li:last-child, .trap li:last-child { border-bottom: none; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; }
+  .num {
+    background: var(--surface-2); color: var(--text-muted);
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px;
+  }
+  .trap .x { color: var(--bad); font-weight: 600; margin-right: 6px; }
+  .trap b, .checklist b { font-weight: 600; }
+  .trap ul { margin: 6px 0 0; padding-left: 18px; }
+  .trap ul li { padding: 3px 0; border: none; }
+
+  .rules {
+    background: var(--good-bg); color: var(--good-fg);
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.55; margin-bottom: 12px;
+  }
+  .rules .rule { display: flex; gap: 10px; align-items: flex-start; padding: 3px 0; }
+  .rules .n { font-weight: 600; min-width: 56px; }
+
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .input-grid > div { display: flex; flex-direction: column; gap: 4px; }
+  .input-grid label, .url-row label { font-size: 12px; color: var(--text-muted); }
+  .url-row { margin-bottom: 10px; }
+  input[type=text], input[type=number], input[type=url], select {
+    font: inherit;
+    font-size: 16px;
+    padding: 10px 12px;
+    border: 0.5px solid var(--border-2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236a6a66' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  input:focus, select:focus { outline: 2px solid var(--text-info); outline-offset: -1px; border-color: transparent; }
+
+  .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  @media (max-width: 420px) { .results { grid-template-columns: repeat(2, 1fr); } }
+  .result { background: var(--surface-2); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .result .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .result .num { font-size: 19px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  .verdict {
+    margin-top: 14px; padding: 13px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .verdict.yes { background: var(--good-bg); color: var(--good-fg); }
+  .verdict.maybe { background: var(--warn-bg); color: var(--warn-fg); }
+  .verdict.no { background: var(--bad-bg); color: var(--bad-fg); }
+
+  .link-btn {
+    display: inline-block; margin-top: 10px; padding: 10px 14px;
+    background: var(--surface-2);
+    border: 0.5px solid var(--border-2);
+    border-radius: var(--radius-sm);
+    font-size: 14px; cursor: pointer; text-decoration: none;
+    color: var(--text);
+  }
+  .link-btn:active { transform: scale(0.98); }
+
+  .fee-tier { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding: 7px 0; font-size: 13px; border-bottom: 0.5px solid var(--border); align-items: baseline; font-variant-numeric: tabular-nums; }
+  .fee-tier:last-child { border-bottom: none; }
+  .fee-tier .cat { color: var(--text); }
+  .fee-tier .rate, .fee-tier .max { color: var(--text-muted); }
+  .fee-tier .max { min-width: 60px; text-align: right; }
+
+  .soon {
+    background: var(--surface-2); color: var(--text);
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; margin-top: 12px; line-height: 1.55;
+  }
+  .soon b { font-weight: 600; }
+  .soon ul { margin: 6px 0 0; padding-left: 18px; }
+  .soon li { margin: 4px 0; }
+  .pro {
+    background: var(--pro-bg); color: var(--pro-fg);
+    font-size: 10px; padding: 2px 6px; border-radius: 4px;
+    margin-left: 4px; vertical-align: middle; letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  details { margin-top: 10px; }
+  details summary {
+    cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--text-info);
+    padding: 8px 0;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: '▸ '; display: inline-block; }
+  details[open] summary::before { content: '▾ '; }
+  .expand-body { font-size: 13px; line-height: 1.6; padding: 4px 0; color: var(--text); }
+  .expand-body b { font-weight: 600; }
+  .expand-body ul { margin: 6px 0; padding-left: 18px; }
+  .expand-body li { margin: 4px 0; }
+
+  .fee-example {
+    background: var(--surface-2);
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    font-size: 13px; margin-top: 10px;
+    font-variant-numeric: tabular-nums; line-height: 1.6;
+  }
+  .fee-example .line { display: flex; justify-content: space-between; }
+  .fee-example .hl { color: var(--bad); font-weight: 600; }
+  .fee-example .ok { color: var(--good); font-weight: 600; }
+
+  footer { margin-top: 40px; padding: 20px 2px; color: var(--text-muted); font-size: 12px; text-align: center; line-height: 1.6; }
+  footer a { color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Polymarket cheat sheet</h1>
+    <p>For amateur bettors. Tables, traps, and a 10-second calculator.</p>
+  </header>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>Price → Payout multiple</h3>
+      <div class="row"><span class="muted">$0.05</span><span class="big good">20x</span></div>
+      <div class="row"><span class="muted">$0.10</span><span class="big good">10x</span></div>
+      <div class="row"><span class="muted">$0.25</span><span class="big">4x</span></div>
+      <div class="row"><span class="muted">$0.33</span><span class="big">3x</span></div>
+      <div class="row"><span class="muted">$0.50</span><span class="big">2x</span></div>
+      <div class="row"><span class="muted">$0.60</span><span class="big">1.67x</span></div>
+      <div class="row"><span class="muted">$0.70</span><span class="big">1.43x</span></div>
+      <div class="row"><span class="muted">$0.80</span><span class="big">1.25x</span></div>
+      <div class="row"><span class="muted">$0.90</span><span class="big warn">1.11x</span></div>
+      <div class="row"><span class="muted">$0.95</span><span class="big bad">1.05x</span></div>
+      <div class="note-red">Above $0.90 = reward crushed. One surprise = 10x the loss vs gain.</div>
+      <div class="note-green">Below $0.10 = lottery. Price swings violent. Only with real domain edge.</div>
+    </div>
+
+    <div class="card">
+      <h3>Scalping — you don't need to hold to $1</h3>
+      <div class="row"><span class="muted">Buy $0.30 → sell $0.50</span><span class="big good">+67%</span></div>
+      <div class="row"><span class="muted">Buy $0.40 → sell $0.60</span><span class="big good">+50%</span></div>
+      <div class="row"><span class="muted">Buy $0.50 → sell $0.70</span><span class="big good">+40%</span></div>
+      <div class="row"><span class="muted">Buy $0.60 → sell $0.80</span><span class="big good">+33%</span></div>
+      <div class="row"><span class="muted">Buy $0.60 → sell $0.90</span><span class="big good">+50%</span></div>
+      <div class="row"><span class="muted">Buy $0.70 → sell $0.85</span><span class="big">+21%</span></div>
+      <div class="row"><span class="muted">Buy $0.70 → sell $0.90</span><span class="big good">+29%</span></div>
+      <div class="row"><span class="muted">Buy $0.80 → sell $0.90</span><span class="big">+13%</span></div>
+      <div class="row"><span class="muted">Buy $0.50 → sell $0.55</span><span class="big warn">+10%</span></div>
+      <div class="note-green"><b>Key point:</b> you don't need resolution to profit. Selling at $0.90 locks in gains <i>and</i> avoids resolution risk. Holding from $0.70 → $1.00 earns +43% but risks full loss. Selling at $0.90 earns +29% with <b>zero</b> tail risk.</div>
+    </div>
+
+    <div class="card">
+      <h3>Scalping — longshots (0.01 → 0.20)</h3>
+      <div class="row"><span class="muted">Buy $0.02 → sell $0.05</span><span class="big good">+150%</span></div>
+      <div class="row"><span class="muted">Buy $0.03 → sell $0.08</span><span class="big good">+167%</span></div>
+      <div class="row"><span class="muted">Buy $0.05 → sell $0.10</span><span class="big good">+100%</span></div>
+      <div class="row"><span class="muted">Buy $0.05 → sell $0.15</span><span class="big good">+200%</span></div>
+      <div class="row"><span class="muted">Buy $0.08 → sell $0.20</span><span class="big good">+150%</span></div>
+      <div class="row"><span class="muted">Buy $0.10 → sell $0.15</span><span class="big good">+50%</span></div>
+      <div class="row"><span class="muted">Buy $0.10 → sell $0.20</span><span class="big good">+100%</span></div>
+      <div class="row"><span class="muted">Buy $0.15 → sell $0.25</span><span class="big good">+67%</span></div>
+
+      <details>
+        <summary>Longshot scalping — pros & cons</summary>
+        <div class="expand-body">
+          <b>Pros</b>
+          <ul>
+            <li>Huge % gains on small absolute moves — a 3¢ move can double your money</li>
+            <li>Limited downside per position (you only lose what you bet)</li>
+            <li>News catalysts move longshots more than favorites (asymmetric response)</li>
+            <li>Fees near the extremes are tiny — the fee formula collapses to near-zero below $0.10</li>
+          </ul>
+          <b>Cons</b>
+          <ul>
+            <li><b>Bid-ask spreads are wide</b> — market might show $0.08 but you buy at $0.10 and sell at $0.06. Spread alone can kill the trade.</li>
+            <li>Thin liquidity — large orders move the price against you. Hard to exit at any size.</li>
+            <li>Most longshots resolve to zero. Win rate will be low even with edge.</li>
+            <li>Mental trap: seeing 20 bets at 5¢ feels cheap, but 20 × $50 = $1000 all going to zero is real</li>
+            <li>Requires <b>repeated</b> edge across many bets, not one "feels like a steal" pick</li>
+          </ul>
+          <b>Rule of thumb</b>
+          <ul>
+            <li>Use limit orders only (taker spreads destroy EV at these prices)</li>
+            <li>Size down — each longshot bet ≤1% of bankroll</li>
+            <li>Set exit targets before entering (e.g. "sell half at 3x, rest at 5x")</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>What not to do</h3>
+      <div class="rules">
+        <div class="rule"><span class="n">Rule 1:</span><span>Don't bet what you can't lose. Entertainment money only. If a loss ruins your week, your size is wrong.</span></div>
+        <div class="rule"><span class="n">Rule 2:</span><span>Never ignore Rule 1.</span></div>
+      </div>
+      <details>
+        <summary>Other traps to avoid</summary>
+        <div class="expand-body">
+          <ul class="trap">
+            <li><span class="x">✕</span><b>Don't chase losses.</b> Doubling down on the next market to "make it back" is the most expensive sentence in betting.</li>
+            <li><span class="x">✕</span><b>Don't ignore resolution wording.</b> "Will X happen by Y?" — does it mean announced, confirmed, or completed? Read carefully before clicking buy.</li>
+            <li><span class="x">✕</span><b>Don't stack correlated bets.</b> Three bets that all pay if same candidate wins = one big bet. You're not diversified, you're concentrated.</li>
+            <li><span class="x">✕</span><b>Don't hold losers hoping.</b> If your thesis breaks, exit. "Maybe it comes back" is how $100 becomes $5.</li>
+            <li><span class="x">✕</span><b>Don't ignore volume and liquidity.</b> This is the single most underrated factor.
+              <ul>
+                <li><b>Size relative to book:</b> if you want to bet $500 and the ask side only has $300 at the shown price, you'll walk up the book and pay worse prices. That's slippage.</li>
+                <li><b>Exit matters more than entry:</b> getting in is easy. Getting out when thesis breaks — or when you want to take profit — requires someone on the other side.</li>
+                <li><b>Low volume ≠ always bad:</b> it can signal an inefficient market (the good kind, for patient bettors). But <b>tread small</b> — size in proportion to the depth you see.</li>
+                <li><b>Rule:</b> your bet size &lt; ~10% of shown book depth on both sides. Otherwise you're the market, not a participant in it.</li>
+              </ul>
+            </li>
+            <li><span class="x">✕</span><b>Don't treat thin markets like liquid ones.</b> A $50k volume market may be a pricing error waiting to be corrected — or a trap with no exit. Small positions let you test without getting stuck.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>Polymarket fees (2026)</h3>
+      <div class="fee-tier"><span class="cat">Geopolitics</span><span class="rate">0%</span><span class="max good">Free</span></div>
+      <div class="fee-tier"><span class="cat">Sports</span><span class="rate">0.75%</span><span class="max">$0.75</span></div>
+      <div class="fee-tier"><span class="cat">Politics / Tech / Finance</span><span class="rate">1.00%</span><span class="max">$1.00</span></div>
+      <div class="fee-tier"><span class="cat">Culture / Weather</span><span class="rate">1.25%</span><span class="max">$1.25</span></div>
+      <div class="fee-tier"><span class="cat">Economics</span><span class="rate">1.50%</span><span class="max">$1.50</span></div>
+      <div class="fee-tier"><span class="cat">Crypto</span><span class="rate">1.80%</span><span class="max">$1.80</span></div>
+
+      <details>
+        <summary>Casual better — should I even care about fees?</summary>
+        <div class="expand-body">
+          <b>Short answer: mostly no.</b> If you're betting $5–$20 for fun, fees are genuinely small in absolute terms.
+          <div class="fee-example">
+            <div class="line"><span>Bet $10 on politics at $0.50:</span><span></span></div>
+            <div class="line"><span>Fee (1% max rate):</span><span class="ok">$0.10</span></div>
+            <div class="line"><span>If you win:</span><span class="ok">payout $19.90</span></div>
+            <div class="line"><span>Fee as % of winnings:</span><span>0.5%</span></div>
+          </div>
+          The cost of fun: a $10 bet costs you roughly a dime in fees. That's less than a coffee tip.
+          <b>When fees DO matter for casuals:</b>
+          <ul>
+            <li><b>Scalping in-and-out</b> — 5 quick trades of $10 = $0.50 in fees. Now fees are 10%+ of a small gain.</li>
+            <li><b>Near-certain bets</b> — paying $0.10 fee on a bet that only pays +11% is a bigger bite</li>
+            <li><b>Building positions over time</b> — 20 small bets × $0.10 each = $2 gone to fees you never noticed</li>
+          </ul>
+          <b>TL;DR:</b> one-off $10 bet for fun = don't worry. Making 10 trades a week = start noticing. Using limit orders (maker) costs zero either way.
+        </div>
+      </details>
+
+      <details>
+        <summary>How Polymarket hides the fee from you</summary>
+        <div class="expand-body">
+          Polymarket doesn't show a fee line in the order confirmation. The fee is <b>baked into the price</b> — you see "Buy 100 shares at $0.60" and $60 leaves your wallet. But you actually receive slightly fewer shares than 100. The missing shares are the fee.
+          <div class="fee-example">
+            <div class="line"><span>You wire:</span><span>$60.00</span></div>
+            <div class="line"><span>Price per share:</span><span>$0.60</span></div>
+            <div class="line"><span>Shares you'd expect (naive):</span><span>100.00</span></div>
+            <div class="line hl"><span>Shares actually received (1%, taker):</span><span>99.04</span></div>
+            <div class="line"><span>Hidden fee:</span><span class="hl">$0.58</span></div>
+          </div>
+          <b>What to check:</b> after every trade, compare shares received to stake ÷ price. Gap = your fee. Use limit orders to pay zero.
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>10-second checklist</h3>
+      <ul class="checklist">
+        <li><span class="num">1</span><div><b>Resolution wording clear?</b> Read criteria. If vague, ambiguous, or "at discretion of..." → <b>skip immediately</b>. Oracle disputes eat winners.</div></li>
+        <li><span class="num">2</span><div><b>Volume + liquidity real?</b> &lt;$100k volume or thin order book = rando opinion, not signal. Check depth at your size.</div></li>
+        <li><span class="num">3</span><div><b>My estimate vs market?</b> Say probability out loud before seeing price. Edge = gap ≥5%.</div></li>
+        <li><span class="num">4</span><div><b>Resolution date?</b> Long locks kill returns. Annualize before comparing to T-bills (~4%).</div></li>
+        <li><span class="num">5</span><div><b>Exit liquidity?</b> Can I sell mid-market if thesis breaks? Thin books = trapped.</div></li>
+      </ul>
+    </div>
+
+    <div class="card full">
+      <h3>Should I take this bet? — calculator</h3>
+      <div class="url-row">
+        <label for="pm-url">Polymarket URL (optional, for reference)</label>
+        <input type="url" id="pm-url" placeholder="https://polymarket.com/event/..." inputmode="url" autocomplete="off" />
+      </div>
+
+      <div class="input-grid">
+        <div>
+          <label for="mkt">Market price ($)</label>
+          <input type="number" id="mkt" min="0.01" max="0.99" step="0.01" value="0.70" inputmode="decimal" />
+        </div>
+        <div>
+          <label for="est">My estimate (%)</label>
+          <input type="number" id="est" min="1" max="99" step="1" value="80" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="size">Bet size ($)</label>
+          <input type="number" id="size" min="1" step="1" value="100" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="days">Days to resolve</label>
+          <input type="number" id="days" min="1" step="1" value="30" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="cat">Category</label>
+          <select id="cat">
+            <option value="0">Geopolitics (0%)</option>
+            <option value="0.0075">Sports (0.75%)</option>
+            <option value="0.01" selected>Politics / Tech / Finance (1%)</option>
+            <option value="0.0125">Culture / Weather (1.25%)</option>
+            <option value="0.015">Economics (1.5%)</option>
+            <option value="0.018">Crypto (1.8%)</option>
+          </select>
+        </div>
+        <div>
+          <label for="order">Order type</label>
+          <select id="order">
+            <option value="taker" selected>Taker (market order)</option>
+            <option value="maker">Maker (limit order, no fee)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="results">
+        <div class="result"><div class="lbl">Edge</div><div class="num" id="r-edge">+10%</div></div>
+        <div class="result"><div class="lbl">Max payout</div><div class="num" id="r-pay">$143</div></div>
+        <div class="result"><div class="lbl">Expected value</div><div class="num" id="r-ev">+$13</div></div>
+      </div>
+      <div class="results" style="margin-top: 8px;">
+        <div class="result"><div class="lbl">ROI if win</div><div class="num" id="r-roi">+43%</div></div>
+        <div class="result"><div class="lbl">Fees paid</div><div class="num" id="r-fee">$1.00</div></div>
+        <div class="result"><div class="lbl">Shares received</div><div class="num" id="r-shares">141</div></div>
+      </div>
+
+      <div class="verdict" id="verdict">Checking...</div>
+      <a id="pm-link" class="link-btn" href="#" style="display:none;" target="_blank" rel="noopener">Open market on Polymarket →</a>
+
+      <div class="soon">
+        <b>Coming soon — bet tracker</b>
+        <ul>
+          <li><b>Free:</b> paste your wallet address, auto-pull last 10 trades, see hit rate + P&L</li>
+          <li>Full history + analytics <span class="pro">PRO</span></li>
+          <li>Bid-ask spread calculator <span class="pro">PRO</span></li>
+          <li>No-side shortcut toggle <span class="pro">PRO</span></li>
+          <li>Correlation warning bank <span class="pro">PRO</span></li>
+          <li>Time-to-resolution decay visualizer <span class="pro">PRO</span></li>
+          <li>Resolution-source sanity check <span class="pro">PRO</span></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    Not financial advice. Polymarket involves real risk of loss.<br>
+    Built for amateur bettors. Rule 1: bet what you can afford to lose.
+  </footer>
+</div>
+
+<script>
+(function() {
+  var ids = ['mkt','est','size','days','cat','order','pm-url'];
+  var el = {};
+  ids.forEach(function(id){ el[id] = document.getElementById(id); });
+  var rEdge = document.getElementById('r-edge');
+  var rPay = document.getElementById('r-pay');
+  var rEv = document.getElementById('r-ev');
+  var rRoi = document.getElementById('r-roi');
+  var rFee = document.getElementById('r-fee');
+  var rShares = document.getElementById('r-shares');
+  var verdict = document.getElementById('verdict');
+  var link = document.getElementById('pm-link');
+
+  function update() {
+    var p = parseFloat(el.mkt.value) || 0.5;
+    var q = (parseFloat(el.est.value) || 50) / 100;
+    var s = parseFloat(el.size.value) || 0;
+    var d = parseFloat(el.days.value) || 1;
+    var feeRate = parseFloat(el.cat.value) || 0;
+    var isMaker = el.order.value === 'maker';
+
+    var feePct = isMaker ? 0 : feeRate * (p * (1 - p)) / 0.25;
+    var fee = s * feePct;
+
+    var edge = q - p;
+    var shares = (s - fee) / p;
+    var payout = shares;
+    var ev = q * payout + (1 - q) * 0 - s;
+    var roiWin = ((payout - s) / s) * 100;
+    var aprPct = ((ev / s) * (365 / d)) * 100;
+
+    rEdge.textContent = (edge >= 0 ? '+' : '') + Math.round(edge * 100) + '%';
+    rPay.textContent = '$' + payout.toFixed(2);
+    rEv.textContent = (ev >= 0 ? '+$' : '-$') + Math.abs(ev).toFixed(2);
+    rRoi.textContent = (roiWin >= 0 ? '+' : '') + roiWin.toFixed(0) + '%';
+    rFee.textContent = '$' + fee.toFixed(2);
+    rShares.textContent = shares.toFixed(1);
+
+    rEdge.style.color = edge >= 0.05 ? 'var(--good)' : (edge >= 0 ? 'var(--warn)' : 'var(--bad)');
+    rEv.style.color = ev > 0 ? 'var(--good)' : 'var(--bad)';
+
+    verdict.classList.remove('yes','maybe','no');
+    if (s < 20) {
+      verdict.textContent = 'SKIP — bet size too small for profit-seeking. Fine if just for fun.';
+      verdict.classList.add('maybe');
+    } else if (edge < 0) {
+      verdict.textContent = 'SKIP — market disagrees with you. No edge.';
+      verdict.classList.add('no');
+    } else if (edge < 0.05) {
+      verdict.textContent = 'SKIP — edge too thin. Noise and fees eat it.';
+      verdict.classList.add('no');
+    } else if (aprPct < 15) {
+      verdict.textContent = 'MAYBE — edge real but capital locked too long. Compare vs T-bills.';
+      verdict.classList.add('maybe');
+    } else if (p > 0.92) {
+      verdict.textContent = 'MAYBE — high-price zone. One surprise = big loss for small gain.';
+      verdict.classList.add('maybe');
+    } else if (p < 0.08) {
+      verdict.textContent = 'MAYBE — lottery zone. Only with real domain expertise.';
+      verdict.classList.add('maybe');
+    } else {
+      verdict.textContent = 'TAKE IT — edge + reasonable price + decent time horizon.';
+      verdict.classList.add('yes');
+    }
+
+    var url = el['pm-url'].value.trim();
+    if (url && /^https?:\/\//.test(url)) {
+      link.href = url;
+      link.style.display = 'inline-block';
+    } else {
+      link.style.display = 'none';
+    }
+  }
+
+  ids.forEach(function(id){
+    el[id].addEventListener('input', update);
+    el[id].addEventListener('change', update);
+  });
+  update();
+})();
+</script>
+</body>
+</html>
