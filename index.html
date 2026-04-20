@@ -269,6 +269,46 @@
     cursor: pointer; font-family: inherit;
   }
   .chain-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  /* History card */
+  .hist-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+  .hist-status { font-size: 13px; color: var(--text-muted); }
+  .hist-pick {
+    background: var(--surface-2); border-radius: var(--radius-sm);
+    padding: 10px; margin-top: 10px;
+  }
+  .hist-pick > div { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .hist-pick button {
+    display: block; width: 100%; text-align: left; padding: 9px 12px;
+    background: var(--surface); color: var(--text);
+    border: 0.5px solid var(--border); border-radius: 6px;
+    margin-bottom: 6px; cursor: pointer; font: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+  .hist-pick button:hover { border-color: var(--text-info); }
+  .hist-pick button:last-child { margin-bottom: 0; }
+  .hist-pick .pseu { font-weight: 600; }
+  .hist-pick .addr { font-size: 11px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+
+  .hist-table { width: 100%; font-size: 13px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .hist-table th, .hist-table td { padding: 8px 6px; text-align: left; border-bottom: 0.5px solid var(--border); vertical-align: top; }
+  .hist-table th { color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .hist-table td.n, .hist-table th.n { text-align: right; white-space: nowrap; }
+  .hist-table .mkt { max-width: 380px; }
+  .hist-table .mkt a { color: var(--text-info); text-decoration: none; }
+  .hist-table .mkt a:hover { text-decoration: underline; }
+  .hist-table tr:last-child td { border-bottom: none; }
+  .hist-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--surface-2); color: var(--text-muted); margin-left: 4px; vertical-align: middle; letter-spacing: 0.04em; }
+  .hist-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; }
+  .hist-section-title { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 18px 0 8px; }
+
+  .btn-primary {
+    background: var(--text); color: var(--bg);
+    border: none; padding: 10px 16px; border-radius: var(--radius-sm);
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: wait; }
 </style>
 </head>
 <body>
@@ -504,16 +544,64 @@
       <a id="pm-link" class="link-btn" href="#" style="display:none;" target="_blank" rel="noopener">Open market on Polymarket →</a>
 
       <div class="soon">
-        <b>Coming soon — bet tracker</b>
+        <b>Coming soon</b>
         <ul>
-          <li><b>Free:</b> paste your wallet address, auto-pull last 10 trades, see hit rate + P&L</li>
-          <li>Full history + analytics <span class="pro">PRO</span></li>
+          <li><b>Bet tracker — live below ↓</b> Paste your wallet, see your full history + P&amp;L</li>
           <li>Bid-ask spread calculator <span class="pro">PRO</span></li>
           <li>No-side shortcut toggle <span class="pro">PRO</span></li>
           <li>Correlation warning bank <span class="pro">PRO</span></li>
           <li>Time-to-resolution decay visualizer <span class="pro">PRO</span></li>
           <li>Resolution-source sanity check <span class="pro">PRO</span></li>
         </ul>
+      </div>
+    </div>
+
+    <div class="card full" id="history-card">
+      <h3>My Polymarket history</h3>
+      <p style="margin: 0 0 12px; font-size: 14px; color: var(--text-muted);">
+        Full bet history, P&amp;L and per-market breakdown. Address is saved only in your browser, sent only to Polymarket's own API. Polymarket users trade from a <b>proxy wallet</b> (not their MetaMask) — find yours at <code style="font-size:12px;">polymarket.com/profile/0x...</code>.
+      </p>
+
+      <div class="input-grid">
+        <div>
+          <label for="hist-addr">Proxy wallet address</label>
+          <input type="text" id="hist-addr" placeholder="0x..." autocomplete="off" spellcheck="false" autocapitalize="off" />
+        </div>
+        <div>
+          <label for="hist-user">Or username (leaderboard users only)</label>
+          <input type="text" id="hist-user" placeholder="e.g. Theo4" autocomplete="off" spellcheck="false" autocapitalize="off" />
+        </div>
+      </div>
+
+      <div class="hist-actions">
+        <button class="btn-primary" id="hist-go" type="button">Look up history</button>
+        <button class="link-btn" id="hist-sample" type="button" style="margin-top:0;">Try a sample wallet</button>
+        <span class="hist-status" id="hist-status"></span>
+      </div>
+
+      <div id="hist-pick" class="hist-pick" style="display:none;"></div>
+      <div id="hist-error" class="note-red" style="display:none; margin-top:12px;"></div>
+
+      <div id="hist-result" style="display:none;">
+        <div class="hist-section-title" id="hist-who"></div>
+        <div class="results" id="hist-summary"></div>
+        <div class="results" id="hist-summary-2" style="margin-top: 8px;"></div>
+
+        <div class="hist-section-title">By market <span id="hist-mkt-note" class="muted" style="text-transform:none; letter-spacing:0; font-weight:400;"></span></div>
+        <div class="hist-scroll"><table class="hist-table" id="hist-markets"></table></div>
+
+        <details style="margin-top: 14px;">
+          <summary>Bet log — <span id="hist-trade-count">0</span> trades · click to expand</summary>
+          <div class="expand-body">
+            <button class="link-btn" id="hist-csv" type="button">Download CSV (all trades)</button>
+            <div class="hist-scroll"><table class="hist-table" id="hist-log"></table></div>
+            <div id="hist-log-note" class="muted" style="font-size:12px; padding:6px 0;"></div>
+          </div>
+        </details>
+
+        <div class="note" style="margin-top: 14px;">
+          <b>How P&amp;L is computed:</b> realized = sum of <code>realizedPnl</code> from open positions + (sells + redemptions − buys) for fully-closed markets. Unrealized = <code>cashPnl</code> from open positions. Rewards from market-making are counted separately. Numbers come straight from Polymarket's data API — no recalculation, no estimation.
+        </div>
       </div>
     </div>
 
@@ -679,6 +767,458 @@
       document.body.removeChild(ta);
       flash();
     }
+  });
+})();
+
+/* ===== My Polymarket history ===== */
+(function () {
+  var DATA_API = 'https://data-api.polymarket.com';
+  var LB_API = 'https://lb-api.polymarket.com';
+  var GAMMA_API = 'https://gamma-api.polymarket.com';
+  var PAGE_SIZE = 500;
+  var MAX_PAGES = 50;       // safety cap = 25k records per dimension
+  var MARKET_ROW_CAP = 200; // shown in by-market table
+  var LOG_ROW_CAP = 500;    // shown in bet log table; CSV exports all
+  var STORAGE_KEY = 'pm-history-addr';
+  var SAMPLE_ADDR = '0x204f72f35326db932158cba6adff0b9a1da95e14'; // swisstony, very active
+
+  var $ = function (id) { return document.getElementById(id); };
+  var addrIn = $('hist-addr');
+  var userIn = $('hist-user');
+  var goBtn = $('hist-go');
+  var sampleBtn = $('hist-sample');
+  var statusEl = $('hist-status');
+  var pickEl = $('hist-pick');
+  var errEl = $('hist-error');
+  var resultEl = $('hist-result');
+  var whoEl = $('hist-who');
+  var sumEl = $('hist-summary');
+  var sum2El = $('hist-summary-2');
+  var mktTable = $('hist-markets');
+  var mktNote = $('hist-mkt-note');
+  var logTable = $('hist-log');
+  var logNote = $('hist-log-note');
+  var tradeCountEl = $('hist-trade-count');
+  var csvBtn = $('hist-csv');
+
+  // Restore last address
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) addrIn.value = saved;
+  } catch (e) { /* ignore */ }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  function fmtUsd(v) {
+    if (v == null || isNaN(v)) return '$0';
+    var sign = v < 0 ? '-' : '';
+    var abs = Math.abs(v);
+    if (abs >= 1000) return sign + '$' + abs.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    return sign + '$' + abs.toFixed(2);
+  }
+  function fmtNum(v, dp) {
+    if (v == null || isNaN(v)) return '0';
+    return Number(v).toLocaleString('en-US', { maximumFractionDigits: dp == null ? 2 : dp });
+  }
+  function pnlClass(v) {
+    if (v == null || isNaN(v)) return 'muted';
+    if (v > 0.5) return 'good';
+    if (v < -0.5) return 'bad';
+    return 'muted';
+  }
+  function setStatus(msg) { statusEl.textContent = msg || ''; }
+  function showError(msg) {
+    errEl.innerHTML = msg;
+    errEl.style.display = 'block';
+  }
+  function clearError() { errEl.style.display = 'none'; errEl.textContent = ''; }
+  function clearPick() { pickEl.style.display = 'none'; pickEl.innerHTML = ''; }
+  function setBusy(busy) {
+    goBtn.disabled = busy;
+    goBtn.textContent = busy ? 'Loading…' : 'Look up history';
+  }
+
+  async function fetchPaged(path, params) {
+    var rows = [];
+    for (var page = 0; page < MAX_PAGES; page++) {
+      var qs = Object.assign({}, params, { limit: PAGE_SIZE, offset: page * PAGE_SIZE });
+      var url = DATA_API + path + '?' + new URLSearchParams(qs).toString();
+      var res = await fetch(url);
+      if (!res.ok) throw new Error('Polymarket API ' + res.status + ' on ' + path);
+      var batch = await res.json();
+      if (!Array.isArray(batch) || batch.length === 0) break;
+      rows.push.apply(rows, batch);
+      if (batch.length < PAGE_SIZE) break;
+    }
+    return rows;
+  }
+
+  async function lookupLeaderboardName(name) {
+    var lc = name.toLowerCase();
+    var seen = {};
+    var matches = [];
+    var sources = [
+      [LB_API + '/profit?window=All&limit=500', 'all-time profit'],
+      [LB_API + '/volume?window=All&limit=500', 'all-time volume'],
+      [LB_API + '/profit?window=Month&limit=500', 'monthly profit'],
+      [LB_API + '/volume?window=Month&limit=500', 'monthly volume']
+    ];
+    for (var i = 0; i < sources.length; i++) {
+      try {
+        var r = await fetch(sources[i][0]);
+        if (!r.ok) continue;
+        var arr = await r.json();
+        if (!Array.isArray(arr)) continue;
+        for (var j = 0; j < arr.length; j++) {
+          var u = arr[j];
+          if (!u.proxyWallet || seen[u.proxyWallet]) continue;
+          var ps = (u.pseudonym || u.name || '').toLowerCase();
+          if (ps && ps.indexOf(lc) !== -1) {
+            seen[u.proxyWallet] = true;
+            matches.push({ proxyWallet: u.proxyWallet, pseudonym: u.pseudonym || u.name || '', source: sources[i][1] });
+          }
+        }
+      } catch (e) { /* skip source */ }
+    }
+    return matches;
+  }
+
+  async function lookupProfile(addr) {
+    try {
+      var r = await fetch(GAMMA_API + '/public-profile?address=' + addr);
+      if (!r.ok) return null;
+      var j = await r.json();
+      if (j && j.pseudonym) return j;
+      return null;
+    } catch (e) { return null; }
+  }
+
+  function aggregate(activity, positions) {
+    var map = Object.create(null);
+    function row(k) {
+      if (!map[k]) {
+        map[k] = {
+          conditionId: k, title: '', slug: '', eventSlug: '', icon: '',
+          buy: 0, sell: 0, redeem: 0, reward: 0,
+          tradeCount: 0, position: null
+        };
+      }
+      return map[k];
+    }
+    var rewardsTotal = 0;
+    var trades = [];
+    for (var i = 0; i < activity.length; i++) {
+      var a = activity[i];
+      if (!a.conditionId) {
+        if (a.type === 'REWARD') rewardsTotal += Number(a.usdcSize) || 0;
+        continue;
+      }
+      var r = row(a.conditionId);
+      r.title = r.title || a.title || '';
+      r.slug = r.slug || a.slug || '';
+      r.eventSlug = r.eventSlug || a.eventSlug || '';
+      r.icon = r.icon || a.icon || '';
+      var us = Number(a.usdcSize) || 0;
+      if (a.type === 'TRADE') {
+        r.tradeCount++;
+        trades.push(a);
+        if (a.side === 'BUY') r.buy += us;
+        else if (a.side === 'SELL') r.sell += us;
+      } else if (a.type === 'REDEEM') {
+        r.redeem += us;
+      } else if (a.type === 'REWARD') {
+        r.reward += us;
+        rewardsTotal += us;
+      }
+      // SPLIT, MERGE, CONVERSION are P&L-neutral for this aggregation
+    }
+    for (var p = 0; p < positions.length; p++) {
+      var pos = positions[p];
+      var rr = row(pos.conditionId);
+      rr.title = rr.title || pos.title || '';
+      rr.slug = rr.slug || pos.slug || '';
+      rr.eventSlug = rr.eventSlug || pos.eventSlug || '';
+      rr.icon = rr.icon || pos.icon || '';
+      rr.position = pos;
+    }
+
+    var rows = [];
+    var totRealized = 0, totUnrealized = 0, totVolume = 0, openCount = 0;
+    Object.keys(map).forEach(function (k) {
+      var r = map[k];
+      var realized;
+      var unrealized = 0;
+      var volume;
+      if (r.position) {
+        // API gives accurate realized + unrealized for positions still tracked
+        realized = Number(r.position.realizedPnl) || 0;
+        unrealized = Number(r.position.cashPnl) || 0;
+        volume = Number(r.position.totalBought) || r.buy;
+        openCount++;
+      } else {
+        // Fully-closed market: derive from trades + redemptions
+        realized = (r.sell + r.redeem) - r.buy;
+        volume = r.buy;
+      }
+      var net = realized + unrealized;
+      rows.push({
+        title: r.title, slug: r.slug, eventSlug: r.eventSlug,
+        tradeCount: r.tradeCount, volume: volume,
+        realized: realized, unrealized: unrealized, net: net,
+        isOpen: !!r.position
+      });
+      totRealized += realized;
+      totUnrealized += unrealized;
+      totVolume += volume;
+    });
+    rows.sort(function (a, b) { return Math.abs(b.net) - Math.abs(a.net); });
+
+    return {
+      rows: rows,
+      trades: trades,
+      totals: {
+        realized: totRealized,
+        unrealized: totUnrealized,
+        net: totRealized + totUnrealized,
+        volume: totVolume,
+        rewards: rewardsTotal,
+        trades: trades.length,
+        markets: rows.length,
+        openMarkets: openCount
+      }
+    };
+  }
+
+  function render(addr, profile, agg) {
+    var t = agg.totals;
+    whoEl.innerHTML = profile && profile.pseudonym
+      ? 'Showing <b>' + escapeHtml(profile.pseudonym) + '</b> · <code style="font-size:11px;">' + escapeHtml(addr) + '</code>'
+      : 'Showing <code style="font-size:11px;">' + escapeHtml(addr) + '</code>';
+
+    sumEl.innerHTML =
+      tile('Net P&L', fmtUsd(t.net), pnlClass(t.net)) +
+      tile('Realized', fmtUsd(t.realized), pnlClass(t.realized)) +
+      tile('Unrealized', fmtUsd(t.unrealized), pnlClass(t.unrealized));
+    sum2El.innerHTML =
+      tile('Volume bought', fmtUsd(t.volume), '') +
+      tile('Trades', fmtNum(t.trades, 0), '') +
+      tile('Markets · open', fmtNum(t.markets, 0) + ' · ' + fmtNum(t.openMarkets, 0), '');
+
+    // By-market table
+    var rows = agg.rows;
+    var capped = rows.slice(0, MARKET_ROW_CAP);
+    mktTable.innerHTML =
+      '<thead><tr>' +
+      '<th class="mkt">Market</th>' +
+      '<th class="n">Trades</th>' +
+      '<th class="n">Bought</th>' +
+      '<th class="n">Realized</th>' +
+      '<th class="n">Unrealized</th>' +
+      '<th class="n">Net</th>' +
+      '</tr></thead>' +
+      '<tbody>' +
+      (capped.length === 0
+        ? '<tr><td colspan="6" class="muted" style="padding:14px 6px;">No markets found for this address.</td></tr>'
+        : capped.map(function (r) {
+            var mkt = r.eventSlug
+              ? '<a href="https://polymarket.com/event/' + escapeHtml(r.eventSlug) + '" target="_blank" rel="noopener">' + escapeHtml(r.title || '(untitled)') + '</a>'
+              : escapeHtml(r.title || '(untitled)');
+            if (r.isOpen) mkt += '<span class="hist-tag">open</span>';
+            return '<tr>' +
+              '<td class="mkt">' + mkt + '</td>' +
+              '<td class="n">' + r.tradeCount + '</td>' +
+              '<td class="n">' + fmtUsd(r.volume) + '</td>' +
+              '<td class="n ' + pnlClass(r.realized) + '">' + fmtUsd(r.realized) + '</td>' +
+              '<td class="n ' + pnlClass(r.unrealized) + '">' + fmtUsd(r.unrealized) + '</td>' +
+              '<td class="n ' + pnlClass(r.net) + '"><b>' + fmtUsd(r.net) + '</b></td>' +
+            '</tr>';
+          }).join('')
+      ) +
+      '</tbody>';
+    mktNote.textContent = rows.length > MARKET_ROW_CAP
+      ? '— showing top ' + MARKET_ROW_CAP + ' of ' + rows.length + ' by absolute P&L'
+      : (rows.length ? '— sorted by absolute P&L impact' : '');
+
+    // Bet log table (most recent first)
+    var trades = agg.trades.slice().sort(function (a, b) { return b.timestamp - a.timestamp; });
+    tradeCountEl.textContent = trades.length.toLocaleString();
+    var capLog = trades.slice(0, LOG_ROW_CAP);
+    logTable.innerHTML =
+      '<thead><tr>' +
+      '<th>Date</th>' +
+      '<th class="mkt">Market</th>' +
+      '<th>Outcome</th>' +
+      '<th>Side</th>' +
+      '<th class="n">Shares</th>' +
+      '<th class="n">Price</th>' +
+      '<th class="n">USDC</th>' +
+      '</tr></thead><tbody>' +
+      capLog.map(function (a) {
+        var d = new Date((a.timestamp || 0) * 1000);
+        var dateStr = isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+        var mkt = a.eventSlug
+          ? '<a href="https://polymarket.com/event/' + escapeHtml(a.eventSlug) + '" target="_blank" rel="noopener">' + escapeHtml(a.title || '') + '</a>'
+          : escapeHtml(a.title || '');
+        var sideCls = a.side === 'BUY' ? 'good' : (a.side === 'SELL' ? 'bad' : '');
+        return '<tr>' +
+          '<td>' + dateStr + '</td>' +
+          '<td class="mkt">' + mkt + '</td>' +
+          '<td>' + escapeHtml(a.outcome || '') + '</td>' +
+          '<td class="' + sideCls + '">' + escapeHtml(a.side || '') + '</td>' +
+          '<td class="n">' + fmtNum(a.size, 2) + '</td>' +
+          '<td class="n">$' + (Number(a.price) || 0).toFixed(3) + '</td>' +
+          '<td class="n">' + fmtUsd(a.usdcSize) + '</td>' +
+        '</tr>';
+      }).join('') +
+      '</tbody>';
+    logNote.textContent = trades.length > LOG_ROW_CAP
+      ? 'Showing ' + LOG_ROW_CAP + ' most recent. CSV export includes all ' + trades.length.toLocaleString() + '.'
+      : '';
+
+    csvBtn.onclick = function () { downloadCsv(trades); };
+
+    resultEl.style.display = 'block';
+  }
+
+  function tile(label, value, cls) {
+    return '<div class="result"><div class="lbl">' + escapeHtml(label) + '</div>' +
+           '<div class="num ' + (cls || '') + '">' + value + '</div></div>';
+  }
+
+  function downloadCsv(trades) {
+    var headers = ['Date (UTC)', 'Market', 'Event slug', 'Outcome', 'Side', 'Shares', 'Price', 'USDC', 'Tx hash'];
+    var lines = [headers.join(',')];
+    for (var i = 0; i < trades.length; i++) {
+      var t = trades[i];
+      var d = new Date((t.timestamp || 0) * 1000);
+      var dateStr = isNaN(d.getTime()) ? '' : d.toISOString();
+      lines.push([
+        dateStr,
+        csvCell(t.title),
+        csvCell(t.eventSlug),
+        csvCell(t.outcome),
+        csvCell(t.side),
+        Number(t.size) || 0,
+        Number(t.price) || 0,
+        Number(t.usdcSize) || 0,
+        csvCell(t.transactionHash)
+      ].join(','));
+    }
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'polymarket-trades.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function csvCell(s) {
+    if (s == null) return '';
+    var v = String(s);
+    if (/[",\n\r]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }
+
+  async function runWithAddress(addr) {
+    clearError();
+    clearPick();
+    resultEl.style.display = 'none';
+    setBusy(true);
+    try {
+      try { localStorage.setItem(STORAGE_KEY, addr); } catch (e) { /* ignore */ }
+
+      setStatus('Looking up profile…');
+      var profile = await lookupProfile(addr);
+
+      setStatus('Fetching activity…');
+      var activity = await fetchPaged('/activity', { user: addr });
+
+      setStatus('Fetching positions…');
+      var positions = await fetchPaged('/positions', { user: addr, sizeThreshold: 0 });
+
+      setStatus('Aggregating ' + activity.length.toLocaleString() + ' events, ' + positions.length.toLocaleString() + ' positions…');
+      var agg = aggregate(activity, positions);
+
+      render(addr, profile, agg);
+      setStatus('Done · ' + agg.totals.markets + ' markets · ' + agg.totals.trades + ' trades');
+    } catch (e) {
+      showError('<b>Lookup failed.</b> ' + escapeHtml(e.message || String(e)) + ' — try again, or check the address is a valid Polymarket proxy wallet.');
+      setStatus('');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function showPicker(name, matches) {
+    pickEl.innerHTML = '<div>Found ' + matches.length + ' leaderboard users matching "' + escapeHtml(name) + '" — pick one:</div>' +
+      matches.slice(0, 12).map(function (m) {
+        return '<button type="button" data-addr="' + escapeHtml(m.proxyWallet) + '">' +
+          '<span class="pseu">' + escapeHtml(m.pseudonym) + '</span>' +
+          '<div class="addr">' + escapeHtml(m.proxyWallet) + ' · seen in ' + escapeHtml(m.source) + '</div>' +
+          '</button>';
+      }).join('');
+    pickEl.style.display = 'block';
+    pickEl.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = b.getAttribute('data-addr');
+        addrIn.value = a;
+        userIn.value = '';
+        clearPick();
+        runWithAddress(a);
+      });
+    });
+  }
+
+  goBtn.addEventListener('click', async function () {
+    clearError();
+    clearPick();
+    var addr = addrIn.value.trim();
+    var name = userIn.value.trim();
+    if (addr) {
+      if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+        showError('That address doesn\'t look right. Expected <code>0x</code> followed by 40 hex characters.');
+        return;
+      }
+      runWithAddress(addr.toLowerCase());
+    } else if (name) {
+      setBusy(true); setStatus('Searching leaderboards…');
+      try {
+        var matches = await lookupLeaderboardName(name);
+        if (matches.length === 0) {
+          showError('No leaderboard user matching "<b>' + escapeHtml(name) + '</b>". Username search only finds users on Polymarket\'s public leaderboards. For everyone else, paste the proxy wallet address (find yours at <code>polymarket.com/profile/0x...</code>).');
+          setStatus('');
+        } else if (matches.length === 1) {
+          addrIn.value = matches[0].proxyWallet;
+          await runWithAddress(matches[0].proxyWallet);
+        } else {
+          showPicker(name, matches);
+          setStatus('');
+        }
+      } catch (e) {
+        showError('Username lookup failed: ' + escapeHtml(e.message || String(e)));
+        setStatus('');
+      } finally {
+        setBusy(false);
+      }
+    } else {
+      showError('Enter a wallet address or a leaderboard username.');
+    }
+  });
+
+  sampleBtn.addEventListener('click', function () {
+    addrIn.value = SAMPLE_ADDR;
+    userIn.value = '';
+    runWithAddress(SAMPLE_ADDR);
+  });
+
+  // Submit on Enter
+  [addrIn, userIn].forEach(function (i) {
+    i.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); goBtn.click(); }
+    });
   });
 })();
 </script>
