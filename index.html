@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#F97316">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta name="description" content="Polymarket cheat sheet & calculator for amateur bettors. Payout tables, scalping gains, fee reality, and a should-I-take-this-bet calculator.">
 <title>Polymarket Cheat Sheet</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -16,36 +17,22 @@
 <meta name="twitter:card" content="summary">
 <style>
   :root {
-    --bg: #fafaf7;
+    color-scheme: light;
+    --bg: #ffffff;
     --surface: #ffffff;
-    --surface-2: #f1efe8;
-    --border: rgba(0,0,0,0.12);
-    --border-2: rgba(0,0,0,0.2);
-    --text: #1a1a1a;
-    --text-muted: #6a6a66;
+    --surface-2: #f5f4f0;
+    --border: rgba(17,17,17,0.08);
+    --border-2: rgba(17,17,17,0.16);
+    --shadow: 0 1px 2px rgba(17,17,17,0.04), 0 4px 12px rgba(17,17,17,0.04);
+    --text: #111111;
+    --text-muted: #66665f;
     --text-info: #185FA5;
-    --good-bg: #E1F5EE; --good-fg: #04342C; --good: #0F6E56;
-    --warn-bg: #FAEEDA; --warn-fg: #412402; --warn: #BA7517;
+    --good-bg: #E6F5EE; --good-fg: #04342C; --good: #0E6E54;
+    --warn-bg: #FBEFD8; --warn-fg: #412402; --warn: #B27414;
     --bad-bg: #FCEBEB; --bad-fg: #501313; --bad: #A32D2D;
     --pro-bg: #26215C; --pro-fg: #EEEDFE;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #171715;
-      --surface: #1f1f1d;
-      --surface-2: #2a2a27;
-      --border: rgba(255,255,255,0.12);
-      --border-2: rgba(255,255,255,0.2);
-      --text: #eaeae5;
-      --text-muted: #9a9a93;
-      --text-info: #85B7EB;
-      --good-bg: #04342C; --good-fg: #9FE1CB; --good: #5DCAA5;
-      --warn-bg: #412402; --warn-fg: #FAC775; --warn: #EF9F27;
-      --bad-bg: #501313; --bad-fg: #F7C1C1; --bad: #F09595;
-      --pro-bg: #CECBF6; --pro-fg: #26215C;
-    }
+    --radius: 14px;
+    --radius-sm: 10px;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -58,12 +45,12 @@
     -webkit-font-smoothing: antialiased;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px 14px 48px; }
-  header { padding: 8px 2px 14px; }
-  header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 14px 56px; }
+  header { padding: 10px 2px 18px; }
+  header h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; letter-spacing: -0.015em; }
   header p { margin: 0; color: var(--text-muted); font-size: 14px; }
 
-  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   @media (min-width: 720px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
 
@@ -71,16 +58,17 @@
     background: var(--surface);
     border: 0.5px solid var(--border);
     border-radius: var(--radius);
-    padding: 14px 16px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
   }
   .card.full { grid-column: 1 / -1; }
   .card h3 {
     margin: 0 0 12px;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
   }
 
   .row { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; font-variant-numeric: tabular-nums; }
@@ -127,43 +115,58 @@
   .rules .rule { display: flex; gap: 10px; align-items: flex-start; padding: 3px 0; }
   .rules .n { font-weight: 600; min-width: 56px; }
 
-  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .input-grid > div { display: flex; flex-direction: column; gap: 4px; }
-  .input-grid label, .url-row label { font-size: 12px; color: var(--text-muted); }
-  .url-row { margin-bottom: 10px; }
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .input-grid > div { display: flex; flex-direction: column; gap: 5px; }
+  .input-grid label, .url-row label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .url-row { margin-top: 12px; }
   input[type=text], input[type=number], input[type=url], select {
     font: inherit;
-    font-size: 16px;
+    font-size: 15px;
     padding: 10px 12px;
-    border: 0.5px solid var(--border-2);
+    border: 1px solid var(--border-2);
     border-radius: var(--radius-sm);
     background: var(--surface);
     color: var(--text);
     width: 100%;
     -webkit-appearance: none;
     appearance: none;
+    transition: border-color 0.12s, box-shadow 0.12s;
   }
+  /* Hide native number spinners */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] { -moz-appearance: textfield; }
   select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236a6a66' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 32px;
   }
-  input:focus, select:focus { outline: 2px solid var(--text-info); outline-offset: -1px; border-color: transparent; }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--text-info);
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.14);
+  }
 
-  .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .results-wrap { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .results-wrap .results-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   @media (max-width: 420px) { .results { grid-template-columns: repeat(2, 1fr); } }
-  .result { background: var(--surface-2); border-radius: var(--radius-sm); padding: 10px 12px; }
-  .result .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-  .result .num { font-size: 19px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .result { background: var(--surface-2); border-radius: var(--radius-sm); padding: 9px 12px; }
+  .result .lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .result .num { font-size: 17px; font-weight: 600; margin-top: 1px; font-variant-numeric: tabular-nums; line-height: 1.25; }
 
   .verdict {
-    margin-top: 14px; padding: 13px 14px;
+    margin-top: 16px; padding: 14px 16px;
     border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 600;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.35;
   }
+  .verdict-title { font-size: 15px; font-weight: 700; letter-spacing: 0.06em; }
+  .verdict-sub { font-size: 12px; font-weight: 500; opacity: 0.78; margin-top: 3px; }
   .verdict.yes { background: var(--good-bg); color: var(--good-fg); }
   .verdict.maybe { background: var(--warn-bg); color: var(--warn-fg); }
   .verdict.no { background: var(--bad-bg); color: var(--bad-fg); }
@@ -487,15 +490,11 @@
 
     <div class="card full">
       <h3>Should I take this bet? — calculator</h3>
-      <div class="url-row">
-        <label for="pm-url">Polymarket URL (optional, for reference)</label>
-        <input type="url" id="pm-url" placeholder="https://polymarket.com/event/..." inputmode="url" autocomplete="off" />
-      </div>
 
       <div class="input-grid">
         <div>
           <label for="mkt">Market price ($)</label>
-          <input type="number" id="mkt" min="0.01" max="0.99" step="0.01" value="0.70" inputmode="decimal" />
+          <input type="text" id="mkt" value="0.70" inputmode="decimal" autocomplete="off" />
         </div>
         <div>
           <label for="est">My estimate (%)</label>
@@ -529,18 +528,29 @@
         </div>
       </div>
 
-      <div class="results">
-        <div class="result"><div class="lbl">Edge</div><div class="num" id="r-edge">+10%</div></div>
-        <div class="result"><div class="lbl">Max payout</div><div class="num" id="r-pay">$143</div></div>
-        <div class="result"><div class="lbl">Expected value</div><div class="num" id="r-ev">+$13</div></div>
-      </div>
-      <div class="results" style="margin-top: 8px;">
-        <div class="result"><div class="lbl">ROI if win</div><div class="num" id="r-roi">+43%</div></div>
-        <div class="result"><div class="lbl">Fees paid</div><div class="num" id="r-fee">$1.00</div></div>
-        <div class="result"><div class="lbl">Shares received</div><div class="num" id="r-shares">141</div></div>
+      <div class="results-wrap">
+        <div class="results-label">Result</div>
+        <div class="results">
+          <div class="result"><div class="lbl">Edge</div><div class="num" id="r-edge">+10%</div></div>
+          <div class="result"><div class="lbl">Max payout</div><div class="num" id="r-pay">$143</div></div>
+          <div class="result"><div class="lbl">Expected value</div><div class="num" id="r-ev">+$13</div></div>
+        </div>
+        <div class="results" style="margin-top: 10px;">
+          <div class="result"><div class="lbl">ROI if win</div><div class="num" id="r-roi">+43%</div></div>
+          <div class="result"><div class="lbl">Fees paid</div><div class="num" id="r-fee">$1.00</div></div>
+          <div class="result"><div class="lbl">Shares received</div><div class="num" id="r-shares">141</div></div>
+        </div>
+
+        <div class="verdict" id="verdict">
+          <div class="verdict-title" id="verdict-title">Checking…</div>
+          <div class="verdict-sub" id="verdict-sub"></div>
+        </div>
       </div>
 
-      <div class="verdict" id="verdict">Checking...</div>
+      <div class="url-row">
+        <label for="pm-url">Polymarket URL (optional)</label>
+        <input type="url" id="pm-url" placeholder="https://polymarket.com/event/..." inputmode="url" autocomplete="off" />
+      </div>
       <a id="pm-link" class="link-btn" href="#" style="display:none;" target="_blank" rel="noopener">Open market on Polymarket →</a>
 
       <div class="soon">
@@ -647,13 +657,29 @@
   var rFee = document.getElementById('r-fee');
   var rShares = document.getElementById('r-shares');
   var verdict = document.getElementById('verdict');
+  var verdictTitle = document.getElementById('verdict-title');
+  var verdictSub = document.getElementById('verdict-sub');
   var link = document.getElementById('pm-link');
 
+  function parseDec(v) {
+    // Accept both comma and dot as decimal separators
+    if (v == null) return NaN;
+    return parseFloat(String(v).trim().replace(',', '.'));
+  }
+
+  function setVerdict(cls, title, sub) {
+    verdict.classList.remove('yes','maybe','no');
+    verdict.classList.add(cls);
+    verdictTitle.textContent = title;
+    verdictSub.textContent = sub || '';
+  }
+
   function update() {
-    var p = parseFloat(el.mkt.value) || 0.5;
-    var q = (parseFloat(el.est.value) || 50) / 100;
-    var s = parseFloat(el.size.value) || 0;
-    var d = parseFloat(el.days.value) || 1;
+    var p = parseDec(el.mkt.value);
+    if (!(p > 0 && p < 1)) p = 0.5;
+    var q = (parseDec(el.est.value) || 50) / 100;
+    var s = parseDec(el.size.value) || 0;
+    var d = parseDec(el.days.value) || 1;
     var feeRate = parseFloat(el.cat.value) || 0;
     var isMaker = el.order.value === 'maker';
 
@@ -677,28 +703,20 @@
     rEdge.style.color = edge >= 0.05 ? 'var(--good)' : (edge >= 0 ? 'var(--warn)' : 'var(--bad)');
     rEv.style.color = ev > 0 ? 'var(--good)' : 'var(--bad)';
 
-    verdict.classList.remove('yes','maybe','no');
     if (s < 20) {
-      verdict.textContent = 'SKIP — bet size too small for profit-seeking. Fine if just for fun.';
-      verdict.classList.add('maybe');
+      setVerdict('maybe', 'SKIP', 'bet size too small to bother — fine just for fun');
     } else if (edge < 0) {
-      verdict.textContent = 'SKIP — market disagrees with you. No edge.';
-      verdict.classList.add('no');
+      setVerdict('no', 'SKIP', 'market disagrees with you — no edge');
     } else if (edge < 0.05) {
-      verdict.textContent = 'SKIP — edge too thin. Noise and fees eat it.';
-      verdict.classList.add('no');
+      setVerdict('no', 'SKIP', 'edge too thin — noise and fees eat it');
     } else if (aprPct < 15) {
-      verdict.textContent = 'MAYBE — edge real but capital locked too long. Compare vs T-bills.';
-      verdict.classList.add('maybe');
+      setVerdict('maybe', 'MAYBE', 'edge real but capital locked too long — compare vs T-bills');
     } else if (p > 0.92) {
-      verdict.textContent = 'MAYBE — high-price zone. One surprise = big loss for small gain.';
-      verdict.classList.add('maybe');
+      setVerdict('maybe', 'MAYBE', 'high-price zone — one surprise = big loss for small gain');
     } else if (p < 0.08) {
-      verdict.textContent = 'MAYBE — lottery zone. Only with real domain expertise.';
-      verdict.classList.add('maybe');
+      setVerdict('maybe', 'MAYBE', 'lottery zone — only with real domain expertise');
     } else {
-      verdict.textContent = 'TAKE IT — edge + reasonable price + decent time horizon.';
-      verdict.classList.add('yes');
+      setVerdict('yes', 'TAKE IT', 'edge + reasonable price + decent time horizon');
     }
 
     var url = el['pm-url'].value.trim();
