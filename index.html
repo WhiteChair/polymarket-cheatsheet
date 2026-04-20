@@ -219,13 +219,48 @@
 
   footer { margin-top: 40px; padding: 20px 2px; color: var(--text-muted); font-size: 12px; text-align: center; line-height: 1.6; }
   footer a { color: var(--text-muted); }
+
+  .tip-buttons { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 8px; }
+  @media (min-width: 480px) { .tip-buttons { grid-template-columns: 1fr 1fr; } }
+  .tip-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 16px; text-decoration: none; color: var(--text);
+    background: var(--surface-2); border: 0.5px solid var(--border-2);
+    border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .tip-btn:active { transform: scale(0.98); }
+  .tip-btn.bmc { background: #FFDD00; color: #000; border-color: #FFDD00; }
+  .tip-btn.bmc:hover { background: #FFE84D; }
+  .crypto-addr {
+    margin-top: 10px; padding: 10px 12px;
+    background: var(--surface-2); border-radius: var(--radius-sm);
+    display: none;
+  }
+  .crypto-addr.open { display: block; }
+  .crypto-addr .chain { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .crypto-addr .addr-row { display: flex; gap: 8px; align-items: center; }
+  .crypto-addr code {
+    flex: 1; font-size: 12px; font-family: ui-monospace, monospace;
+    word-break: break-all; color: var(--text);
+    background: var(--surface); padding: 8px 10px; border-radius: 6px;
+    border: 0.5px solid var(--border);
+  }
+  .crypto-addr button {
+    background: var(--text); color: var(--bg); border: none;
+    padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  .crypto-addr .copied { color: var(--good); font-size: 11px; margin-top: 6px; opacity: 0; transition: opacity 0.2s; }
+  .crypto-addr .copied.show { opacity: 1; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>Polymarket cheat sheet</h1>
-    <p>For amateur bettors. Tables, traps, and a 10-second calculator. Live.</p>
+    <p>For amateur bettors. Tables, traps, and a 10-second calculator.</p>
   </header>
 
   <div class="grid">
@@ -247,17 +282,28 @@
     </div>
 
     <div class="card">
-      <h3>Scalping — you don't need to hold to $1</h3>
-      <div class="row"><span class="muted">Buy $0.30 → sell $0.50</span><span class="big good">+67%</span></div>
-      <div class="row"><span class="muted">Buy $0.40 → sell $0.60</span><span class="big good">+50%</span></div>
-      <div class="row"><span class="muted">Buy $0.50 → sell $0.70</span><span class="big good">+40%</span></div>
-      <div class="row"><span class="muted">Buy $0.60 → sell $0.80</span><span class="big good">+33%</span></div>
+      <h3>Scalping — exits at $0.90 (no tail risk)</h3>
+      <div class="row"><span class="muted">Buy $0.20 → sell $0.90</span><span class="big good">+350%</span></div>
+      <div class="row"><span class="muted">Buy $0.30 → sell $0.90</span><span class="big good">+200%</span></div>
+      <div class="row"><span class="muted">Buy $0.40 → sell $0.90</span><span class="big good">+125%</span></div>
+      <div class="row"><span class="muted">Buy $0.50 → sell $0.90</span><span class="big good">+80%</span></div>
       <div class="row"><span class="muted">Buy $0.60 → sell $0.90</span><span class="big good">+50%</span></div>
-      <div class="row"><span class="muted">Buy $0.70 → sell $0.85</span><span class="big">+21%</span></div>
       <div class="row"><span class="muted">Buy $0.70 → sell $0.90</span><span class="big good">+29%</span></div>
       <div class="row"><span class="muted">Buy $0.80 → sell $0.90</span><span class="big">+13%</span></div>
-      <div class="row"><span class="muted">Buy $0.50 → sell $0.55</span><span class="big warn">+10%</span></div>
-      <div class="note-green"><b>Key point:</b> you don't need resolution to profit. Selling at $0.90 locks in gains <i>and</i> avoids resolution risk. Holding from $0.70 → $1.00 earns +43% but risks full loss. Selling at $0.90 earns +29% with <b>zero</b> tail risk.</div>
+      <div class="note-green"><b>Key point:</b> you don't need resolution to profit. Selling at $0.90 locks in gains <i>and</i> avoids resolution risk. Holding $0.70 → $1.00 earns +43% but risks full loss on a surprise. Selling at $0.90 earns +29% with <b>zero</b> tail risk.</div>
+
+      <details>
+        <summary>Smaller exit targets (sell below $0.90)</summary>
+        <div class="expand-body" style="padding-top: 8px;">
+          <div class="row"><span class="muted">Buy $0.30 → sell $0.50</span><span class="big good">+67%</span></div>
+          <div class="row"><span class="muted">Buy $0.40 → sell $0.60</span><span class="big good">+50%</span></div>
+          <div class="row"><span class="muted">Buy $0.50 → sell $0.70</span><span class="big good">+40%</span></div>
+          <div class="row"><span class="muted">Buy $0.60 → sell $0.80</span><span class="big good">+33%</span></div>
+          <div class="row"><span class="muted">Buy $0.70 → sell $0.85</span><span class="big">+21%</span></div>
+          <div class="row"><span class="muted">Buy $0.50 → sell $0.55</span><span class="big warn">+10%</span></div>
+          <div style="margin-top: 10px; color: var(--text-muted);">Exiting earlier = faster capital turnover, lower % per trade. Good when a market stalls or when you need to free up bankroll.</div>
+        </div>
+      </details>
     </div>
 
     <div class="card">
@@ -456,6 +502,23 @@
       </div>
     </div>
 
+    <div class="card full">
+      <h3>Support the project</h3>
+      <p style="margin: 0 0 10px; font-size: 14px; color: var(--text-muted);">This is free and ad-free. If it saved you from a bad bet, tip a coffee's worth.</p>
+      <div class="tip-buttons">
+        <a class="tip-btn bmc" href="https://buymeacoffee.com/YOUR_USERNAME" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+        <button class="tip-btn" id="crypto-toggle" type="button">⟠ Pay in crypto</button>
+      </div>
+      <div class="crypto-addr" id="crypto-panel">
+        <div class="chain">USDC / ETH / any EVM chain</div>
+        <div class="addr-row">
+          <code id="crypto-address">0xYOUR_WALLET_ADDRESS_HERE</code>
+          <button id="copy-btn" type="button">Copy</button>
+        </div>
+        <div class="copied" id="copied-msg">Copied ✓</div>
+      </div>
+    </div>
+
   </div>
 
   <footer>
@@ -544,6 +607,41 @@
     el[id].addEventListener('change', update);
   });
   update();
+
+  // Crypto tip panel
+  var cryptoToggle = document.getElementById('crypto-toggle');
+  var cryptoPanel = document.getElementById('crypto-panel');
+  var copyBtn = document.getElementById('copy-btn');
+  var copiedMsg = document.getElementById('copied-msg');
+  var cryptoAddr = document.getElementById('crypto-address');
+
+  cryptoToggle.addEventListener('click', function(){
+    cryptoPanel.classList.toggle('open');
+  });
+
+  copyBtn.addEventListener('click', function(){
+    var text = cryptoAddr.textContent.trim();
+    function flash(){
+      copiedMsg.classList.add('show');
+      setTimeout(function(){ copiedMsg.classList.remove('show'); }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(flash, function(){
+        // fallback
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta);
+        flash();
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      flash();
+    }
+  });
 })();
 </script>
 </body>
